@@ -1,0 +1,9 @@
+#!/bin/sh
+STORE="${BGIT_STORE:-$PWD/.bgit}"
+cat > .cgitrc << EOF
+scan-path=$STORE
+css=/cgit-dark.css
+logo=/cgit.png
+js=
+EOF
+exec lighttpd -D -f cgit-lighttpd.conf

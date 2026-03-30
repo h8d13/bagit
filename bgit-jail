@@ -1,0 +1,68 @@
+#!/usr/bin/env python3
+"""
+bgit-serve: Restricted SSH commands for git "jail".
+"""
+import os
+import shlex
+import sys
+from pathlib import Path
+
+ALLOWED = ("git-upload-pack", "git-receive-pack", "git-upload-archive")
+_STORE_LOC = Path.cwd() / ".bgit"
+
+_STORE_LOC.mkdir(parents=True, exist_ok=True)
+
+def die(msg):
+    sys.exit(f"error: {msg}")
+
+def resolve_repo(arg):
+    repo = arg.strip().lstrip("/")
+    if repo.startswith("-"):
+        die("invalid path")
+    if not repo.endswith(".git"):
+        repo += ".git"
+
+    path = (_STORE_LOC / repo).resolve()
+    if not path.is_relative_to(_STORE_LOC.resolve()):
+        die("invalid path")
+    return path
+
+def main():
+    cmd = shlex.split(os.environ.get("SSH_ORIGINAL_COMMAND", ""))
+    if not cmd:
+        die("no shell access")
+
+    if cmd[0] == "bgit-list":
+        if len(cmd) != 1:
+            die("invalid args")
+        for repo in _STORE_LOC.iterdir():
+            if repo.suffix == ".git":
+                print(repo.name)
+
+    elif cmd[0] == "bgit-init":
+        if len(cmd) < 2:
+            die("invalid args")
+        repo = resolve_repo(cmd[1])
+        if repo.exists():
+            die("already exists")
+        os.system(f"git init --bare {repo}")
+        desc = " ".join(cmd[2:]) if len(cmd) > 2 else ""
+        if desc:
+            (repo / "description").write_text(desc + "\n")
+
+    elif cmd[0] in ALLOWED:
+        if len(cmd) != 2:
+            die("invalid args")
+        repo = resolve_repo(cmd[1])
+        if not repo.exists():
+            if cmd[0] == "git-receive-pack":
+                os.system(f"git init --bare {repo}")
+            else:
+                die("not found")
+        os.execvp(cmd[0], [cmd[0], str(repo)])
+
+    else:
+        die("not allowed")
+
+if __name__ == "__main__":
+    main()
