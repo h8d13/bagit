@@ -1,111 +1,171 @@
-/* Import the default cgit styles */
-@import url("cgit-stock.css");
+/* cgit dark mode using CSS variables */
+@import url("cgit.css");
 
-/* Dark mode from upstream cgit (jd/zx2c4-deployment branch) */
-:root { color-scheme: light dark; }
-@media only all and (prefers-color-scheme: dark) {
-    html, div#cgit { color: #eee; background: #171717; }
-    div#cgit a { color: #3af; }
-    div#cgit .diffstat-header a { color: #28d; }
-    div#cgit table#header td.main a { color: #eee; }
-    div#cgit table#header td.sub { color: #999; }
-    div#cgit table.tabs { border-bottom-color: #444; }
-    div#cgit table.tabs td a { color: #888; }
-    div#cgit table.tabs td a.active { color: #fff; background-color: #444; }
-    div#cgit div.path { color: #eee; background-color: #333; }
-    div#cgit div.content { border-bottom-color: #bbb; }
-    div#cgit table.list tr { background: #171717; }
-    div#cgit table.list tr.logheader { background: #171717; }
-    div#cgit table.list tr:nth-child(even) { background: #171717; }
-    div#cgit table.list tr:nth-child(odd) { background: #1f1f1f; }
-    div#cgit table.list tr:hover { background: #333; }
-    div#cgit table.list tr.nohover { background: #171717; }
-    div#cgit table.list tr.nohover:hover { background: #171717; }
-    div#cgit table.list tr.nohover-highlight:hover:nth-child(even) { background: #171717; }
-    div#cgit table.list tr.nohover-highlight:hover:nth-child(odd) { background: #1f1f1f; }
-    div#cgit table.list td.commitgraph .column1 { color: #f55; }
-    div#cgit table.list td.commitgraph .column2 { color: #5f5; }
-    div#cgit table.list td.commitgraph .column3 { color: #ff5; }
-    div#cgit table.list td.commitgraph .column4 { color: #55f; }
-    div#cgit table.list td.commitgraph .column5 { color: #f5f; }
-    div#cgit table.list td.commitgraph .column6 { color: #5ff; }
-    div#cgit table.list td a { color: #eee; }
-    div#cgit table.list td a.ls-dir { color: #28d; }
-    div#cgit table.list td a:hover { color: #3af; }
-    div#cgit table#downloads { border-color: #888; }
-    div#cgit table#downloads th { background-color: #333; }
-    div#cgit div#blob { border-color: #eee; }
-    div#cgit table.blob { border-top-color: #eee; }
+:root {
+    color-scheme: light dark;
+    --bg-color: #ffffff;
+    --bg-alt: #f0f0f0;
+    --text-color: #000000;
+    --link-color: #0000cc;
+    --link-hover: #880000;
+    --border-color: #d0d0d0;
+    --panel-bg: #f0f0f0;
+    --footer-color: #787878;
+    --diff-add: #070;
+    --diff-del: #a00;
+    --diff-hunk: #0000cc;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --bg-color: #1e1e1e;
+        --bg-alt: #242424;
+        --text-color: #E0E0E0;
+        --link-color: #58a6ff;
+        --link-hover: #79beff;
+        --border-color: #30363d;
+        --panel-bg: #2d2d2d;
+        --footer-color: #8b949e;
+        --diff-add: #6c6;
+        --diff-del: #c66;
+        --diff-hunk: #58a6ff;
+    }
+
+    html, div#cgit { color: var(--text-color); background: var(--bg-color); }
+    div#cgit a { color: var(--link-color); }
+    div#cgit a:hover { color: var(--link-hover); }
+    div#cgit .diffstat-header a { color: var(--link-color); }
+    div#cgit table#header td.main a { color: var(--text-color); }
+    div#cgit table#header td.sub { color: var(--footer-color); }
+    div#cgit table.tabs { border-bottom-color: var(--border-color); }
+    div#cgit table.tabs td a { color: var(--footer-color); }
+    div#cgit table.tabs td a.active { color: var(--text-color); background-color: var(--panel-bg); }
+    div#cgit div.path { color: var(--text-color); background-color: var(--panel-bg); }
+    div#cgit div.content { border-bottom-color: var(--border-color); }
+    div#cgit table.list tr { background: var(--bg-color); }
+    div#cgit table.list tr.logheader { background: var(--bg-color); }
+    div#cgit table.list tr:nth-child(even) { background: var(--bg-color); }
+    div#cgit table.list tr:nth-child(odd) { background: var(--bg-alt); }
+    div#cgit table.list tr:hover { background: var(--panel-bg); }
+    div#cgit table.list tr.nohover { background: var(--bg-color); }
+    div#cgit table.list tr.nohover:hover { background: var(--bg-color); }
+    div#cgit table.list td a { color: var(--text-color); }
+    div#cgit table.list td a.ls-dir { color: var(--link-color); }
+    div#cgit table.list td a:hover { color: var(--link-color); }
+    div#cgit table#downloads { border-color: var(--border-color); }
+    div#cgit table#downloads th { background-color: var(--panel-bg); }
+    div#cgit div#blob { border-color: var(--border-color); }
+    div#cgit table.blob { border-top-color: var(--border-color); }
     div#cgit table.blob td.hashes,
-    div#cgit table.blob td.lines { color: #eee; }
-    div#cgit table.blob td.linenumbers { border-right-color: gray; }
-    div#cgit table.blob td.linenumbers a,
-    div#cgit table.ssdiff td.lineno a { color: gray; }
-    div#cgit table.blob td.linenumbers a:hover,
-    div#cgit table.ssdiff td.lineno a:hover { color: #eee; }
-    div#cgit table.blame div.alt:nth-child(even) { background: #171717; }
-    div#cgit table.blame div.alt:nth-child(odd) { background: #1f1f1f; }
-    div#cgit table.bin-blob { border-color: #eee; }
-    div#cgit table.bin-blob th { border-color: #888; }
-    div#cgit table.bin-blob td { border-left-color: #888; }
-    div#cgit div.cgit-panel table { border-color: #555; background-color: #282828; }
+    div#cgit table.blob td.lines { color: var(--text-color); }
+    div#cgit table.blob td.linenumbers { border-right-color: var(--border-color); }
+    div#cgit table.blob td.linenumbers a { color: var(--footer-color); }
+    div#cgit table.blob td.linenumbers a:hover { color: var(--text-color); }
+    div#cgit table.ssdiff td.lineno a { color: var(--footer-color); }
+    div#cgit table.ssdiff td.lineno a:hover { color: var(--text-color); }
+    div#cgit table.blame div.alt:nth-child(even) { background: var(--bg-color); }
+    div#cgit table.blame div.alt:nth-child(odd) { background: var(--bg-alt); }
+    div#cgit table.bin-blob { border-color: var(--border-color); }
+    div#cgit table.bin-blob th { border-color: var(--border-color); }
+    div#cgit table.bin-blob td { border-left-color: var(--border-color); }
+    div#cgit div.cgit-panel table { border-color: var(--border-color); background-color: var(--panel-bg); }
     div#cgit div.notes { border-color: #661; background-color: #220; }
-    div#cgit table.diffstat { border-color: #555; background-color: #282828; }
-    div#cgit table.diffstat td span.modechange { color: #c66; }
-    div#cgit table.diffstat td.add a { color: #6c6; }
-    div#cgit table.diffstat td.del a { color: #c66; }
-    div#cgit table.diffstat td.upd a { color: #3af; }
+    div#cgit table.diffstat { border-color: var(--border-color); background-color: var(--panel-bg); }
+    div#cgit table.diffstat td span.modechange { color: var(--diff-del); }
+    div#cgit table.diffstat td.add a { color: var(--diff-add); }
+    div#cgit table.diffstat td.del a { color: var(--diff-del); }
+    div#cgit table.diffstat td.upd a { color: var(--link-color); }
     div#cgit table.diffstat td.graph td.add { background-color: #3a3; }
     div#cgit table.diffstat td.graph td.rem { background-color: #a33; }
-    div#cgit div.diffstat-summary { color: #777; }
-    div#cgit table.diff td div.head { color: #eee; }
-    div#cgit table.diff td div.hunk { color: #28d; }
-    div#cgit table.diff td div.add { color: #6c6; }
-    div#cgit table.diff td div.del { color: #c66; }
-    div#cgit table.list td.reposection { color: #777; }
-    div#cgit ul.pager a { color: #888; }
+    div#cgit div.diffstat-summary { color: var(--footer-color); }
+    div#cgit table.diff td div.head { color: var(--text-color); }
+    div#cgit table.diff td div.hunk { color: var(--diff-hunk); }
+    div#cgit table.diff td div.add { color: var(--diff-add); }
+    div#cgit table.diff td div.del { color: var(--diff-del); }
+    div#cgit table.list td.reposection { color: var(--footer-color); }
+    div#cgit ul.pager a { color: var(--footer-color); }
     div#cgit span.age-mins { color: #7f7; }
     div#cgit span.age-hours { color: #7f7; }
     div#cgit span.age-days { color: #9d9; }
     div#cgit span.age-weeks { color: #bbb; }
-    div#cgit span.age-months { color: #888; }
+    div#cgit span.age-months { color: var(--footer-color); }
     div#cgit span.age-years { color: #666; }
-    div#cgit span.insertions { color: #7f7; }
-    div#cgit span.deletions { color: #e33; }
-    div#cgit div.footer { color: #555; }
-    div#cgit div.footer a { color: #555; }
+    div#cgit span.insertions { color: var(--diff-add); }
+    div#cgit span.deletions { color: var(--diff-del); }
+    div#cgit div.footer { color: var(--footer-color); }
+    div#cgit div.footer a { color: var(--footer-color); }
     div#cgit a.branch-deco { color: #fff; background-color: #361; border-color: #3b2; }
     div#cgit a.tag-deco { color: #fff; background-color: #650; border-color: #ba3; }
     div#cgit a.tag-annotated-deco { color: #fff; background-color: #840; border-color: #b96; }
     div#cgit a.remote-deco { color: #fff; background-color: #348; border-color: #67c; }
     div#cgit a.deco { color: #fff; background-color: #922; border-color: #d55; }
-    div#cgit a.branch-deco:hover, div#cgit table.list td a.branch-deco:hover,
-    div#cgit a.tag-deco:hover, div#cgit table.list td a.tag-deco:hover,
-    div#cgit a.tag-annotated-deco:hover, div#cgit table.list td a.tag-annotated-deco:hover,
-    div#cgit a.remote-deco:hover, div#cgit table.list td a.remote-deco:hover,
-    div#cgit a.deco:hover, div#cgit table.list td a.deco:hover { color: #fff; }
-    div#cgit table.stats { border-color: #555; }
-    div#cgit table.stats th { background-color: #333; border-color: #555; }
-    div#cgit table.stats td { border-color: #555; }
-    div#cgit table.stats td.sum { color: #5C7E9B; }
-    div#cgit table.vgraph { border-color: #eee; }
-    div#cgit table.vgraph th { background-color: #1f1f1f; border-color: black; }
-    div#cgit table.vgraph div.bar { background-color: #1f1f1f; }
-    div#cgit table.hgraph { border-color: #eee; }
-    div#cgit table.hgraph th { background-color: #1f1f1f; border-color: #eee; }
-    div#cgit table.hgraph div.bar { background-color: #1f1f1f; }
-    div#cgit table.ssdiff td { border-left-color: #555; border-right-color: #555; }
-    div#cgit table.ssdiff td.add { color: #eee; background: #353; }
-    div#cgit table.ssdiff td.add_dark { color: #eee; background: #030; }
-    div#cgit table.ssdiff span.add { background: #030; }
-    div#cgit table.ssdiff td.del { color: #eee; background: #533; }
-    div#cgit table.ssdiff td.del_dark { color: #eee; background: #411; }
-    div#cgit table.ssdiff span.del { background: #300; }
-    div#cgit table.ssdiff td.changed { color: #eee; background: #553; }
-    div#cgit table.ssdiff td.changed_dark { color: #eee; background: #330; }
-    div#cgit table.ssdiff td.lineno { color: #eee; background: #1f1f1f; }
-    div#cgit table.ssdiff td.hunk { color: #eee; background: #0D3D64; border-top-color: #555; border-bottom-color: #555; }
-    div#cgit table.ssdiff td.head { border-top-color: #555; border-bottom-color: #555; }
-    div#cgit table.ssdiff td.head div.head { color: #eee; }
-    div#cgit table.ssdiff td.foot { border-top-color: #555; }
+    div#cgit table.stats { border-color: var(--border-color); }
+    div#cgit table.stats th { background-color: var(--panel-bg); border-color: var(--border-color); }
+    div#cgit table.stats td { border-color: var(--border-color); }
+    div#cgit table.ssdiff td { border-left-color: var(--border-color); border-right-color: var(--border-color); }
+    div#cgit table.ssdiff td.add { color: var(--text-color); background: #253; }
+    div#cgit table.ssdiff td.del { color: var(--text-color); background: #433; }
+    div#cgit table.ssdiff td.changed { color: var(--text-color); background: #443; }
+    div#cgit table.ssdiff td.lineno { color: var(--text-color); background: var(--bg-alt); }
+    div#cgit table.ssdiff td.hunk { color: var(--text-color); background: #135; }
+}
+
+/* Markdown about page styling */
+div#cgit div.markdown-body {
+    line-height: 1.6;
+    padding: 10px 0;
+}
+
+div#cgit div.markdown-body h1,
+div#cgit div.markdown-body h2 {
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 0.3em;
+    margin-top: 1em;
+}
+
+div#cgit div.markdown-body pre {
+    background: var(--panel-bg);
+    padding: 12px;
+    border-radius: 4px;
+    overflow-x: auto;
+}
+
+div#cgit div.markdown-body code {
+    background: var(--panel-bg);
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 90%;
+}
+
+div#cgit div.markdown-body pre code {
+    background: none;
+    padding: 0;
+}
+
+div#cgit div.markdown-body blockquote {
+    border-left: 4px solid var(--border-color);
+    padding-left: 16px;
+    color: var(--footer-color);
+    margin-left: 0;
+}
+
+div#cgit div.markdown-body table {
+    border-collapse: collapse;
+    width: 100%;
+    margin: 1em 0;
+}
+
+div#cgit div.markdown-body th,
+div#cgit div.markdown-body td {
+    border: 1px solid var(--border-color);
+    padding: 8px 12px;
+    text-align: left;
+}
+
+div#cgit div.markdown-body th {
+    background: var(--panel-bg);
+}
+
+div#cgit div.markdown-body img {
+    max-width: 100%;
 }

@@ -2,6 +2,7 @@
 set -e
 
 ssh-keygen -A
+git config --system --add safe.directory '*'
 
 if [ -n "$SSH_AUTHORIZED_KEYS" ]; then
     echo "command=\"/usr/local/bin/bgit-jail\",no-port-forwarding,no-agent-forwarding,no-pty $SSH_AUTHORIZED_KEYS" \
