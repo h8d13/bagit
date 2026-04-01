@@ -13,4 +13,4 @@ fi
 
 /usr/sbin/sshd
 export BGIT_STORE=/data
-exec ./cgit-serve
+exec su-exec cgit ./cgit-serve

@@ -45,7 +45,7 @@ def main():
         repo = resolve_repo(cmd[1])
         if repo.exists():
             die("already exists")
-        os.system(f"git init --bare {repo}")
+        os.system(f"git init --bare {repo} && chmod -R o+rX {repo}")
         desc = " ".join(cmd[2:]) if len(cmd) > 2 else ""
         if desc:
             (repo / "description").write_text(desc + "\n")
@@ -56,7 +56,7 @@ def main():
         repo = resolve_repo(cmd[1])
         if not repo.exists():
             if cmd[0] == "git-receive-pack":
-                os.system(f"git init --bare {repo}")
+                os.system(f"git init --bare {repo} && chmod -R o+rX {repo}")
             else:
                 die("not found")
         os.execvp(cmd[0], [cmd[0], str(repo)])
