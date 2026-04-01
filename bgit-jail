@@ -39,12 +39,28 @@ def resolve_repo(arg):
 def init_repo(repo_path):
     """Safely initialize a git repo without shell injection."""
     subprocess.run(["git", "init", "--bare", str(repo_path)], check=True)
-    # Set permissions recursively
+
+    # Set permissions recursively (before adding hooks)
     for root, dirs, files in os.walk(repo_path):
         for d in dirs:
             os.chmod(os.path.join(root, d), 0o755)
         for f in files:
             os.chmod(os.path.join(root, f), 0o644)
+
+    # Create post-receive hook to auto-set owner from first commit
+    hooks_dir = repo_path / "hooks"
+    hooks_dir.mkdir(exist_ok=True)
+    post_receive = hooks_dir / "post-receive"
+    post_receive.write_text('''#!/bin/sh
+# Auto-set owner from first commit author if not set
+if [ -z "$(git config gitweb.owner)" ]; then
+    author=$(git log --reverse --format='%an' | head -1)
+    if [ -n "$author" ]; then
+        git config gitweb.owner "$author"
+    fi
+fi
+''')
+    post_receive.chmod(0o755)
 
 def main():
     cmd = shlex.split(os.environ.get("SSH_ORIGINAL_COMMAND", ""))
@@ -68,6 +84,16 @@ def main():
         desc = " ".join(cmd[2:]) if len(cmd) > 2 else ""
         if desc:
             (repo / "description").write_text(desc + "\n")
+
+    elif cmd[0] == "bgit-rm":
+        if len(cmd) != 2:
+            die("usage: bgit-rm <repo>")
+        repo = resolve_repo(cmd[1])
+        if not repo.exists():
+            die("not found")
+        import shutil
+        shutil.rmtree(repo)
+        print(f"Deleted {repo.name}")
 
     elif cmd[0] in ALLOWED:
         if len(cmd) != 2:
