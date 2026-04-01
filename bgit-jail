@@ -3,12 +3,17 @@
 bgit-serve: Restricted SSH commands for git "jail".
 """
 import os
+import re
 import shlex
+import subprocess
 import sys
 from pathlib import Path
 
 ALLOWED = ("git-upload-pack", "git-receive-pack", "git-upload-archive")
 _STORE_LOC = Path.cwd() / ".bgit"
+
+# Only allow safe characters in repo names
+SAFE_REPO_PATTERN = re.compile(r'^[a-zA-Z0-9_.-]+$')
 
 _STORE_LOC.mkdir(parents=True, exist_ok=True)
 
@@ -22,10 +27,24 @@ def resolve_repo(arg):
     if not repo.endswith(".git"):
         repo += ".git"
 
+    # Validate repo name contains only safe characters
+    if not SAFE_REPO_PATTERN.match(repo):
+        die("invalid repo name")
+
     path = (_STORE_LOC / repo).resolve()
     if not path.is_relative_to(_STORE_LOC.resolve()):
         die("invalid path")
     return path
+
+def init_repo(repo_path):
+    """Safely initialize a git repo without shell injection."""
+    subprocess.run(["git", "init", "--bare", str(repo_path)], check=True)
+    # Set permissions recursively
+    for root, dirs, files in os.walk(repo_path):
+        for d in dirs:
+            os.chmod(os.path.join(root, d), 0o755)
+        for f in files:
+            os.chmod(os.path.join(root, f), 0o644)
 
 def main():
     cmd = shlex.split(os.environ.get("SSH_ORIGINAL_COMMAND", ""))
@@ -45,7 +64,7 @@ def main():
         repo = resolve_repo(cmd[1])
         if repo.exists():
             die("already exists")
-        os.system(f"git init --bare {repo} && chmod -R o+rX {repo}")
+        init_repo(repo)
         desc = " ".join(cmd[2:]) if len(cmd) > 2 else ""
         if desc:
             (repo / "description").write_text(desc + "\n")
@@ -56,7 +75,7 @@ def main():
         repo = resolve_repo(cmd[1])
         if not repo.exists():
             if cmd[0] == "git-receive-pack":
-                os.system(f"git init --bare {repo} && chmod -R o+rX {repo}")
+                init_repo(repo)
             else:
                 die("not found")
         os.execvp(cmd[0], [cmd[0], str(repo)])
