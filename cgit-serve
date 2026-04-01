@@ -1,10 +1,11 @@
 #!/bin/sh
 STORE="${BGIT_STORE:-$PWD/.bgit}"
 cat > .cgitrc << EOF
-scan-path=$STORE
 virtual-root=/
 css=/cgit-dark.css
 logo=/cgit.png
 js=
+source-filter=/usr/lib/cgit/filters/syntax-highlighting.py
+scan-path=$STORE
 EOF
 exec lighttpd -D -f cgit-lighttpd.conf
