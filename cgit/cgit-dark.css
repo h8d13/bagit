@@ -117,10 +117,55 @@ div#cgit div.markdown-body {
 }
 
 div#cgit div.markdown-body h1,
-div#cgit div.markdown-body h2 {
+div#cgit div.markdown-body h2,
+div#cgit div.markdown-body h3,
+div#cgit div.markdown-body h4,
+div#cgit div.markdown-body h5,
+div#cgit div.markdown-body h6 {
     border-bottom: 1px solid var(--border-color);
     padding-bottom: 0.3em;
     margin-top: 1em;
+}
+
+@media (prefers-color-scheme: dark) {
+    .markdown-body, .markdown-body * {
+        color: #E0E0E0 !important;
+    }
+    .markdown-body h1,
+    .markdown-body h2,
+    .markdown-body h3,
+    .markdown-body h4,
+    .markdown-body h5,
+    .markdown-body h6 {
+        color: #E0E0E0 !important;
+        border-bottom-color: #30363d !important;
+    }
+    .markdown-body a,
+    .markdown-body a.toclink,
+    div#cgit .markdown-body h1 a.toclink,
+    div#cgit .markdown-body h2 a.toclink,
+    div#cgit .markdown-body h3 a.toclink,
+    div#cgit .markdown-body h4 a.toclink,
+    div#cgit .markdown-body h5 a.toclink,
+    div#cgit .markdown-body h6 a.toclink {
+        color: #E0E0E0 !important;
+    }
+    .markdown-body code,
+    .markdown-body pre {
+        background: #2d2d2d !important;
+        color: #E0E0E0 !important;
+    }
+    .markdown-body blockquote {
+        border-left-color: #30363d !important;
+        color: #8b949e !important;
+    }
+    .markdown-body hr {
+        background-color: #30363d !important;
+    }
+    .markdown-body table th,
+    .markdown-body table td {
+        border-color: #30363d !important;
+    }
 }
 
 div#cgit div.markdown-body pre {

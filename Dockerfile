@@ -1,6 +1,6 @@
 FROM alpine:latest
 
-RUN apk add --no-cache git openssh-server lighttpd python3 py3-pygments cgit lua5.3 \
+RUN apk add --no-cache git openssh-server lighttpd python3 py3-pygments py3-markdown cgit lua5.3 \
     && adduser -D git \
     && passwd -u git \
     && mkdir -p /home/git/.ssh /data \

@@ -6,6 +6,10 @@ css=/cgit-dark.css
 logo=/cgit.png
 js=
 source-filter=/usr/lib/cgit/filters/syntax-highlighting.py
+about-filter=/usr/lib/cgit/filters/about-formatting.sh
+snapshots=tar.gz tar.bz2 zip
+readme=:README.md
+readme=:README
 scan-path=$STORE
 EOF
 exec lighttpd -D -f cgit-lighttpd.conf
