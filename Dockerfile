@@ -1,25 +1,19 @@
 FROM alpine:latest
 
-RUN apk add --no-cache git openssh-server lighttpd python3 py3-pygments py3-markdown cgit lua5.3 su-exec \
+RUN apk add --no-cache git openssh-server python3 \
     && adduser -D git \
-    && adduser -D -H cgit \
     && passwd -u git \
     && mkdir -p /home/git/.ssh /data \
     && ln -s /data /home/git/.bgit \
     && chown -R git:git /home/git /data \
     && chmod 755 /data
 
-WORKDIR /srv/gid
-RUN mkdir cgit && cp /usr/share/webapps/cgit/* cgit/ && rm -f cgit/cgit.js
-COPY cgit/cgit-dark.css cgit/markdown.lua cgit/md-handler.cgi cgit/
-COPY cgit-lighttpd.conf cgit-serve ./
 COPY bgit-jail /usr/local/bin/
-RUN chmod +x /usr/local/bin/bgit-jail cgit-serve cgit/md-handler.cgi \
-    && chown -R cgit:cgit /srv/gid
+RUN chmod +x /usr/local/bin/bgit-jail
 
 COPY entrypoint.sh /
 RUN chmod +x /entrypoint.sh
 
 VOLUME /data
-EXPOSE 22 8080
+EXPOSE 22
 ENTRYPOINT ["/entrypoint.sh"]
