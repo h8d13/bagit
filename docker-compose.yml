@@ -1,0 +1,15 @@
+services:
+  bgit:
+    build: .
+    image: bgit
+    container_name: bgit
+    ports:
+      - "2222:22"
+    volumes:
+      - "${BGIT_DATA:-bgit-data}:/data"   # set BGIT_DATA=./data to bind-mount for debug
+    environment:
+      SSH_AUTHORIZED_KEYS: "${SSH_AUTHORIZED_KEYS:-}"
+    restart: unless-stopped
+
+volumes:
+  bgit-data:

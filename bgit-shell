@@ -1,0 +1,84 @@
+#!/bin/sh
+# bgit-shell: the git user's login shell for bagit.
+#
+# git's server side already has a restricted shell (git-shell) and the smart
+# protocol. It lacks exactly two things, which this wrapper adds before handing
+# the real work to git-shell:
+#
+#   1. push-to-create -- `git push` to a new name inits the bare repo first
+#                        (git-shell never auto-creates).
+#   2. confinement    -- the path is resolved to a flat child of $HOME; any
+#                        leading `/` or `~/` is stripped, traversal and odd
+#                        names are rejected.
+#
+# Remotes work in the natural form:
+#   ssh://git@host:PORT/name.git    or    git@host:name.git
+#
+# sshd invokes this as `bgit-shell -c "<git verb> '<path>'"` and also exports
+# the same string as SSH_ORIGINAL_COMMAND, which is what we read.
+set -u
+set -f                                  # no pathname globbing of the command
+
+deny() { printf 'bagit: %s\n' "$1" >&2; exit 128; }
+
+# The requested command arrives as `-c <cmd>` when we are the login shell, or as
+# SSH_ORIGINAL_COMMAND when invoked as a forced command. Support both.
+if [ "${1:-}" = "-c" ]; then
+    cmd=${2:-}
+else
+    cmd=${SSH_ORIGINAL_COMMAND:-}
+fi
+
+if [ -z "$cmd" ]; then
+    deny "interactive access is disabled"
+fi
+
+cd "${HOME:-/data}" || deny "cannot access home"
+
+# Flat, home-relative repo name: alnum and . _ - only, no leading dot/dash,
+# no `..`. The negated bracket also rejects '/', so namespaces stay flat.
+valid_name() {
+    case $1 in
+        '')                 return 1 ;;
+        *[!A-Za-z0-9._-]*)  return 1 ;;
+        .* | -*)            return 1 ;;
+        *..*)               return 1 ;;
+    esac
+    return 0
+}
+
+# Whitelist the three smart-protocol verbs (dashed and space forms) and split
+# off the path argument. Anything else (a shell, a custom verb): denied.
+case "$cmd" in
+    git-receive-pack\ *)    gitcmd=git-receive-pack   ; arg=${cmd#git-receive-pack } ;;
+    'git receive-pack '*)   gitcmd=git-receive-pack   ; arg=${cmd#git receive-pack } ;;
+    git-upload-pack\ *)     gitcmd=git-upload-pack    ; arg=${cmd#git-upload-pack } ;;
+    'git upload-pack '*)    gitcmd=git-upload-pack    ; arg=${cmd#git upload-pack } ;;
+    git-upload-archive\ *)  gitcmd=git-upload-archive ; arg=${cmd#git-upload-archive } ;;
+    'git upload-archive '*) gitcmd=git-upload-archive ; arg=${cmd#git upload-archive } ;;
+    *) deny "command not allowed" ;;
+esac
+
+# Dequote git's single-quoted path; reject nested quoting as too complex.
+arg=${arg#\'}; arg=${arg%\'}
+case "$arg" in *\'*) deny "bad repo path" ;; esac
+
+# Resolve to a flat child of $HOME: drop a leading ~ and any leading slashes, so
+# ssh://host/name.git, ssh://host/~/name.git and scp host:name.git all land in
+# the same place. valid_name then rejects nested paths, traversal and bad chars.
+name=${arg#\~}
+while [ "${name#/}" != "$name" ]; do name=${name#/}; done
+case "$name" in *.git) ;; *) name="$name.git" ;; esac
+
+valid_name "$name" || deny "invalid repo name"
+repo=$HOME/$name
+
+# Push-to-create. Reads of a missing repo fall through so git-shell emits the
+# standard "does not exist" error rather than us half-handling it.
+if [ "$gitcmd" = git-receive-pack ] && [ ! -e "$repo" ]; then
+    git init --quiet --bare "$repo" || deny "could not create repo"
+fi
+
+# Hand the resolved, absolute repo path to git-shell for the actual protocol
+# exec (it re-checks the verb; the path holds only validated chars).
+exec git shell -c "$gitcmd '$repo'"

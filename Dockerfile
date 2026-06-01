@@ -1,15 +1,16 @@
 FROM alpine:latest
 
-RUN apk add --no-cache git openssh-server python3 \
-    && adduser -D git \
+RUN apk add --no-cache git openssh-server \
+    && adduser -D -h /data -s /usr/local/bin/bgit-shell git \
     && passwd -u git \
-    && mkdir -p /home/git/.ssh /data \
-    && ln -s /data /home/git/.bgit \
-    && chown -R git:git /home/git /data \
+    && echo /usr/local/bin/bgit-shell >> /etc/shells \
+    && mkdir -p /data/.ssh \
+    && chown -R git:git /data \
+    && chmod 700 /data/.ssh \
     && chmod 755 /data
 
-COPY bgit-jail /usr/local/bin/
-RUN chmod +x /usr/local/bin/bgit-jail
+COPY bgit-shell /usr/local/bin/
+RUN chmod +x /usr/local/bin/bgit-shell
 
 COPY entrypoint.sh /
 RUN chmod +x /entrypoint.sh

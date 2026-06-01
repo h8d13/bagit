@@ -1,19 +1,26 @@
-# Bgit
+# Bagit
 
-SSH-jail git server in a docker container. Forced-command authorized_keys runs `bgit-jail` (whitelist: `git-upload-pack`, `git-receive-pack`, `git-upload-archive`, plus `bgit-list`/`bgit-init`/`bgit-rm`). Bare repos live under `/data` (volume).
+Minimal SSH git server: **git-shell + push-to-create**. 
 
-Build:
+Bare repos live under the git user's home (a Docker/Podman volume). 
 
-	docker build -t bgit .
+The git user's login shell is `bgit-shell`, a thin POSIX-sh wrapper that adds
+the two things git's server side lacks (auto-create on push, confinement to the
+home dir) and then hands every protocol operation to `git-shell`.
 
-Run:
+## Run
 
-	docker run -d --name bgit -p 2222:22 -v bgit-data:/data \
-	    -e SSH_AUTHORIZED_KEYS="$(cat ~/.ssh/id_ed25519.pub)" bgit
+	echo "SSH_AUTHORIZED_KEYS=$(cat ~/.ssh/id_ed25519.pub)" > .env
+	# or export directly; can also be multiple.
+	docker compose up -d --build
 
-Use:
+## Use
 
-	ssh -p 2222 git@host bgit-init repo "description"
-	git remote add origin ssh://git@host:2222/repo
-	git push origin master
+	git remote add origin ssh://git@host:2222/myrepo.git
+	git push origin master          # repo auto-created on first push
+	git clone ssh://git@host:2222/myrepo.git
 
+## Notes
+
+- Repo names are a flat namespace: letters, digits, `.`, `_`, `-` only.
+- Debug remove stale runs: `ssh-keygen -R '[localhost]:2222'`
